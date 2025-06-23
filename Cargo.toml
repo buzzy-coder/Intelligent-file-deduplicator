@@ -1,0 +1,10 @@
+[package]
+name = "project-1"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+blake3 = "1.8.2"
+rayon = "1.10.0"
+sha2 = "0.10.9"
+twox-hash = "2.1.1"
