@@ -33,3 +33,55 @@ pub fn hash_file(path: &Path, algo: HashAlgorithm) -> Option<String> {
 
     Some(hash)
 }
+
+
+
+
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs::File;
+    use std::io::Write;
+    use std::path::PathBuf;
+
+    fn create_temp_file(name: &str, content: &str) -> PathBuf {
+        let path = PathBuf::from(name);
+        let mut file = File::create(&path).unwrap();
+        write!(file, "{}", content).unwrap();
+        path
+    }
+
+    #[test]
+    fn test_hash_file_sha256() {
+        let path = create_temp_file("test_sha256.txt", "hello rust");
+        let result = hash_file(&path, HashAlgorithm::Sha256);
+        assert!(result.is_some());
+        std::fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn test_hash_file_blake3() {
+        let path = create_temp_file("test_blake3.txt", "hello rust");
+        let result = hash_file(&path, HashAlgorithm::Blake3);
+        assert!(result.is_some());
+        std::fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn test_hash_file_xxhash() {
+        let path = create_temp_file("test_xxhash.txt", "hello rust");
+        let result = hash_file(&path, HashAlgorithm::XxHash);
+        assert!(result.is_some());
+        std::fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn test_hash_file_nonexistent() {
+        let path = PathBuf::from("non_existent_file.txt");
+        let result = hash_file(&path, HashAlgorithm::Sha256);
+        assert!(result.is_none());
+    }
+}
+
