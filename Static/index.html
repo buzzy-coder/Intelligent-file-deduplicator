@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rust File Deduplicator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background-color: #f8f8f8;
+    }
+    .container {
+      background-color: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 { text-align: center; }
+    label { display: block; margin: 1rem 0 0.5rem; }
+    select, input[type="file"] {
+      width: 100%;
+      padding: 0.5rem;
+    }
+    button {
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 1rem;
+      background-color: #0077cc;
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005fa3;
+    }
+    .result {
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧠 Rust File Deduplicator</h1>
+    
+    <label for="folder">Select Folder:</label>
+    <input type="file" id="folder" webkitdirectory directory />
+
+    <label for="hash">Select Hashing Algorithm:</label>
+    <select id="hash">
+      <option value="sha256">SHA-256</option>
+      <option value="blake3">BLAKE3</option>
+      <option value="xxhash">XxHash</option>
+    </select>
+
+    <label for="action">Action on Duplicates:</label>
+    <select id="action">
+      <option value="quarantine">Quarantine</option>
+      <option value="delete">Delete</option>
+      <option value="none">Just Report</option>
+    </select>
+
+    <button onclick="submitDeduplication()">🔍 Start Deduplication</button>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    async function submitDeduplication() {
+      const folderInput = document.getElementById("folder");
+      const hashAlgo = document.getElementById("hash").value;
+      const action = document.getElementById("action").value;
+      const resultBox = document.getElementById("result");
+
+      if (!folderInput.files.length) {
+        resultBox.innerHTML = "<p>Please select a folder.</p>";
+        return;
+      }
+
+      const files = Array.from(folderInput.files);
+      const formData = new FormData();
+      files.forEach((file) => formData.append("files", file));
+      formData.append("hash", hashAlgo);
+      formData.append("action", action);
+
+      resultBox.innerHTML = "Processing...";
+
+      try {
+        const response = await fetch("/api/deduplicate", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+        resultBox.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+      } catch (err) {
+        resultBox.innerHTML = `<p style='color:red;'>Error: ${err.message}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>
